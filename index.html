@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App - Яндекс Погода</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    <title>WeatherScope - современный прогноз погоды</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --primary-color: #00a6ff;
-            --secondary-color: #f5f5f6;
-            --text-color: #333;
-            --light-text: #999;
-            --card-bg: #fff;
-            --bg-color: #f0f1f2;
-            --border-color: #e0e0e0;
-            --header-bg: #fff;
-            --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --secondary: #3f37c9;
+            --dark: #1b263b;
+            --light: #f8f9fa;
+            --gray: #adb5bd;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --card-bg: #ffffff;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .dark-theme {
-            --primary-color: #00a6ff;
-            --secondary-color: #2d2d2d;
-            --text-color: #e0e0e0;
-            --light-text: #a0a0a0;
-            --card-bg: #1e1e1e;
-            --bg-color: #121212;
-            --border-color: #333;
-            --header-bg: #1e1e1e;
-            --shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            --primary: #4895ef;
+            --primary-light: #4361ee;
+            --secondary: #4cc9f0;
+            --dark: #f8f9fa;
+            --light: #1b263b;
+            --gray: #6c757d;
+            --card-bg: #2b2d42;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
         * {
@@ -39,11 +40,12 @@
         }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
             line-height: 1.6;
-            transition: background-color 0.3s, color 0.3s;
+            transition: var(--transition);
+            min-height: 100vh;
         }
 
         .container {
@@ -56,21 +58,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 0;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--header-bg);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            transition: background-color 0.3s, border-color 0.3s;
+            padding: 20px 0;
+            margin-bottom: 30px;
         }
 
         .logo {
-            font-family: 'Roboto Condensed', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-size: 24px;
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--primary);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
         }
 
         .header-actions {
@@ -80,205 +89,240 @@
         }
 
         .btn {
-            background-color: var(--primary-color);
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 12px;
             cursor: pointer;
-            font-family: 'Roboto', sans-serif;
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 5px;
-            transition: background-color 0.3s, transform 0.2s;
+            gap: 8px;
+            transition: var(--transition);
+            font-size: 14px;
         }
 
         .btn:hover {
-            background-color: #0088cc;
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
         }
 
         .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn i {
-            font-size: 16px;
+            transform: translateY(0);
         }
 
         .btn-icon {
             background: none;
-            color: var(--text-color);
-            padding: 8px;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            color: var(--dark);
+            padding: 10px;
+            border-radius: 12px;
+            width: 42px;
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.3s;
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .btn-icon:hover {
-            background-color: rgba(0, 166, 255, 0.1);
+            background-color: rgba(67, 97, 238, 0.1);
+            border-color: transparent;
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 20px;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+
+        .weather-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
         }
 
         .current-weather {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: var(--shadow);
-            transition: background-color 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
         }
 
         .location {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            gap: 10px;
         }
 
-        .location i {
-            margin-right: 8px;
-            color: var(--primary-color);
-        }
-
-        .location h2 {
+        .location-icon {
+            color: var(--primary);
             font-size: 20px;
+        }
+
+        .location-text {
+            font-size: 18px;
             font-weight: 500;
         }
 
         .weather-main {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            gap: 15px;
         }
 
         .temperature {
-            font-size: 64px;
+            font-size: 72px;
             font-weight: 300;
-            margin-right: 15px;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .weather-icon {
             width: 80px;
             height: 80px;
-            margin-right: 15px;
         }
 
         .weather-description {
             font-size: 16px;
-            color: var(--light-text);
+            color: var(--gray);
+            text-transform: capitalize;
         }
 
         .weather-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 25px;
+            gap: 20px;
+            margin-top: auto;
         }
 
         .detail-item {
             display: flex;
             align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background-color: rgba(67, 97, 238, 0.05);
+            border-radius: 12px;
         }
 
         .detail-icon {
             width: 24px;
             height: 24px;
-            margin-right: 10px;
-            color: var(--primary-color);
+            color: var(--primary);
+        }
+
+        .detail-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--gray);
         }
 
         .detail-value {
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: 500;
         }
 
-        .forecast {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: var(--shadow);
-            transition: background-color 0.3s, box-shadow 0.3s;
+        .forecast-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
         }
 
         .section-title {
             font-size: 18px;
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 20px;
-            color: var(--light-text);
-            text-transform: uppercase;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary);
         }
 
         .hourly-forecast {
             display: flex;
             overflow-x: auto;
             gap: 15px;
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary-color) var(--secondary-color);
-        }
-
-        .hourly-forecast::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .hourly-forecast::-webkit-scrollbar-track {
-            background: var(--secondary-color);
-            border-radius: 3px;
-        }
-
-        .hourly-forecast::-webkit-scrollbar-thumb {
-            background-color: var(--primary-color);
-            border-radius: 3px;
+            padding-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .hour-card {
-            min-width: 80px;
+            min-width: 90px;
             text-align: center;
-            padding: 10px;
-            background-color: var(--secondary-color);
-            border-radius: 8px;
-            transition: background-color 0.3s;
+            padding: 15px 10px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hour-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
         .hour-time {
             font-size: 14px;
-            margin-bottom: 5px;
-            color: var(--light-text);
+            margin-bottom: 10px;
+            color: var(--gray);
+            font-weight: 500;
         }
 
         .hour-icon {
             width: 40px;
             height: 40px;
-            margin: 5px auto;
+            margin: 5px 0;
         }
 
         .hour-temp {
-            font-size: 16px;
-            font-weight: 500;
+            font-size: 18px;
+            font-weight: 600;
         }
 
         .daily-forecast {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 10px;
+            gap: 12px;
         }
 
         .day-card {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
-            background-color: var(--secondary-color);
-            border-radius: 8px;
-            transition: background-color 0.3s;
+            padding: 15px 20px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .day-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
         .day-name {
@@ -289,49 +333,34 @@
         .day-weather {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
         }
 
         .day-icon {
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
         }
 
         .day-temps {
             display: flex;
-            gap: 15px;
+            gap: 20px;
         }
 
         .day-temp {
             width: 30px;
             text-align: right;
-        }
-
-        .day-temp.day-temp-max {
             font-weight: 500;
         }
 
-        .day-temp.day-temp-min {
-            color: var(--light-text);
+        .day-temp-max {
+            color: var(--dark);
         }
 
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-            font-size: 18px;
-            color: var(--light-text);
-            gap: 10px;
+        .day-temp-min {
+            color: var(--gray);
         }
 
-        .error {
-            color: #ff3333;
-            text-align: center;
-            padding: 20px;
-        }
-
-        /* Настройки профиля */
+        /* Профиль и настройки */
         .profile-menu {
             position: relative;
         }
@@ -339,17 +368,17 @@
         .profile-dropdown {
             position: absolute;
             right: 0;
-            top: 50px;
+            top: 60px;
             background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            width: 250px;
-            padding: 15px;
-            z-index: 200;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            width: 280px;
+            padding: 20px;
+            z-index: 100;
             opacity: 0;
-            transform: translateY(-10px);
+            transform: translateY(-20px);
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .profile-dropdown.active {
@@ -361,243 +390,313 @@
         .dropdown-header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .dropdown-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background-color: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
+            font-size: 20px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
         }
 
         .dropdown-user {
             font-size: 14px;
+            overflow: hidden;
         }
 
         .dropdown-user-name {
-            font-weight: 500;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .dropdown-user-email {
-            font-size: 12px;
-            color: var(--light-text);
+            font-size: 13px;
+            color: var(--gray);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .dropdown-item {
             display: flex;
             align-items: center;
-            padding: 10px 0;
+            padding: 12px 0;
             cursor: pointer;
             transition: color 0.3s;
+            font-size: 14px;
         }
 
         .dropdown-item:hover {
-            color: var(--primary-color);
+            color: var(--primary);
         }
 
         .dropdown-item i {
-            margin-right: 10px;
+            margin-right: 12px;
             width: 20px;
             text-align: center;
+            font-size: 16px;
         }
 
         .theme-switcher {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 10px;
             margin: 15px 0;
+            padding: 15px 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .theme-option {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
             cursor: pointer;
+            padding: 8px 0;
+        }
+
+        .theme-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .theme-radio {
             appearance: none;
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--light-text);
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gray);
             border-radius: 50%;
             position: relative;
             cursor: pointer;
+            transition: var(--transition);
         }
 
         .theme-radio:checked {
-            border-color: var(--primary-color);
+            border-color: var(--primary);
         }
 
         .theme-radio:checked::after {
             content: '';
             position: absolute;
-            width: 8px;
-            height: 8px;
-            background-color: var(--primary-color);
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary);
             border-radius: 50%;
-            top: 2px;
-            left: 2px;
+            top: 3px;
+            left: 3px;
         }
 
-        /* Мобильная версия */
+        /* Состояния загрузки и ошибки */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            gap: 15px;
+            color: var(--gray);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(67, 97, 238, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            gap: 15px;
+            text-align: center;
+            color: var(--warning);
+        }
+
+        .error-icon {
+            font-size: 40px;
+        }
+
+        /* Telegram кнопка */
+        .tg-btn {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-size: 14px;
+        }
+
+        .tg-btn:hover {
+            background-color: #0077b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 136, 204, 0.2);
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Мобильная адаптация */
         @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .current-weather, .forecast {
-                padding: 15px;
-            }
-
             .temperature {
-                font-size: 48px;
+                font-size: 60px;
             }
 
             .weather-icon {
-                width: 60px;
-                height: 60px;
+                width: 70px;
+                height: 70px;
+            }
+
+            .detail-item {
+                padding: 10px;
+            }
+
+            .hour-card {
+                min-width: 80px;
+                padding: 12px 8px;
+            }
+
+            .day-card {
+                padding: 12px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .btn-text {
+                display: none;
             }
 
             .weather-details {
                 grid-template-columns: 1fr;
             }
 
-            .hour-card {
-                min-width: 70px;
-                padding: 8px;
-            }
-
-            .hour-icon {
-                width: 30px;
-                height: 30px;
-            }
-
             .profile-dropdown {
-                width: 220px;
+                width: 100%;
+                right: auto;
+                left: 0;
             }
-        }
-
-        @media (max-width: 480px) {
-            .header-actions {
-                gap: 8px;
-            }
-
-            .btn {
-                padding: 6px 10px;
-                font-size: 14px;
-            }
-
-            .btn-icon {
-                width: 32px;
-                height: 32px;
-                padding: 6px;
-            }
-
-            .location h2 {
-                font-size: 18px;
-            }
-
-            .section-title {
-                font-size: 16px;
-            }
-
-            .day-name {
-                width: 80px;
-                font-size: 14px;
-            }
-
-            .day-temps {
-                gap: 10px;
-            }
-        }
-
-        /* Telegram кнопка */
-        .tg-login-btn {
-            background-color: #0088cc;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: 'Roboto', sans-serif;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: background-color 0.3s;
-        }
-
-        .tg-login-btn:hover {
-            background-color: #0077b3;
-        }
-
-        .tg-login-btn i {
-            font-size: 16px;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="logo">Kiber-Погода</div>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-cloud-sun"></i>
+                </div>
+                <span>WeatherScope</span>
+            </div>
             <div class="header-actions" id="authSection">
                 <!-- Будет заполнено скриптом -->
             </div>
         </header>
 
-        <div class="main-content">
-            <div class="current-weather">
+        <main class="main-content">
+            <section class="weather-card current-weather">
                 <div class="location" id="location">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <h2>Определение местоположения...</h2>
+                    <i class="fas fa-location-dot location-icon"></i>
+                    <div class="location-text">Определение местоположения...</div>
                 </div>
                 <div class="weather-main" id="currentWeather">
                     <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i> Загрузка данных...
+                        <div class="loading-spinner"></div>
+                        <div>Загрузка данных о погоде...</div>
                     </div>
                 </div>
                 <div class="weather-details" id="weatherDetails"></div>
-            </div>
+            </section>
 
-            <div class="forecast">
-                <h3 class="section-title">Почасовой прогноз</h3>
-                <div class="hourly-forecast" id="hourlyForecast">
-                    <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i> Загрузка данных...
+            <section class="forecast-container">
+                <div class="weather-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-clock"></i>
+                        <span>Почасовой прогноз</span>
+                    </h3>
+                    <div class="hourly-forecast" id="hourlyForecast">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                        </div>
                     </div>
                 </div>
 
-                <h3 class="section-title">Прогноз на 5 дней</h3>
-                <div class="daily-forecast" id="dailyForecast">
-                    <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i> Загрузка данных...
+                <div class="weather-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-calendar-days"></i>
+                        <span>Прогноз на 5 дней</span>
+                    </h3>
+                    <div class="daily-forecast" id="dailyForecast">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 
     <script>
         // Конфигурация
-        const API_KEY = 'cd0d7ec8d086c6aa9f7698eafa163fdb'; // Замените на ваш API ключ
-        const UNITS = 'metric'; // metric для Цельсия, imperial для Фаренгейта
-        const LANG = 'ru'; // Язык ответа
+        const API_KEY = 'cd0d7ec8d086c6aa9f7698eafa163fdb'; // Пример ключа, замените на свой
+        const UNITS = 'metric';
+        const LANG = 'ru';
 
         // DOM элементы
         const authSection = document.getElementById('authSection');
@@ -615,7 +714,15 @@
             photoUrl: null
         };
 
-        // Проверяем, открыто ли в Telegram WebApp
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            initTelegramWebApp();
+            renderAuthSection();
+            getUserLocation();
+            setupEventListeners();
+        });
+
+        // Проверка Telegram WebApp
         function isTelegramWebApp() {
             return window.Telegram && window.Telegram.WebApp;
         }
@@ -624,10 +731,8 @@
         function initTelegramWebApp() {
             if (isTelegramWebApp()) {
                 const tg = window.Telegram.WebApp;
-                tg.expand(); // Раскрываем приложение на весь экран
+                tg.expand();
                 
-                // Получаем данные пользователя
-                const initData = tg.initData || '';
                 const initDataUnsafe = tg.initDataUnsafe || {};
                 
                 if (initDataUnsafe.user) {
@@ -636,18 +741,16 @@
                     user.username = initDataUnsafe.user.username || 'user';
                     user.photoUrl = initDataUnsafe.user.photo_url || null;
                 }
-                
-                renderAuthSection();
             }
         }
 
-        // Рендерим секцию авторизации
+        // Рендер секции авторизации
         function renderAuthSection() {
             if (user.isAuthenticated) {
-                // Показываем профиль для авторизованного пользователя
                 authSection.innerHTML = `
                     <button class="btn" id="refreshBtn">
-                        <i class="fas fa-sync-alt"></i> <span class="btn-text">Обновить</span>
+                        <i class="fas fa-sync-alt"></i>
+                        <span class="btn-text">Обновить</span>
                     </button>
                     <div class="profile-menu">
                         <button class="btn-icon" id="profileBtn">
@@ -655,7 +758,7 @@
                         </button>
                         <div class="profile-dropdown" id="profileDropdown">
                             <div class="dropdown-header">
-                                <div class="dropdown-avatar" style="${user.photoUrl ? `background-image: url(${user.photoUrl}); background-size: cover;` : ''}">
+                                <div class="dropdown-avatar" style="${user.photoUrl ? `background-image: url(${user.photoUrl})` : ''}">
                                     ${!user.photoUrl ? user.name.charAt(0).toUpperCase() : ''}
                                 </div>
                                 <div class="dropdown-user">
@@ -665,12 +768,22 @@
                             </div>
                             <div class="theme-switcher">
                                 <div class="theme-option">
-                                    <input type="radio" id="lightTheme" name="theme" class="theme-radio" value="light" checked>
-                                    <label for="lightTheme">Светлая</label>
+                                    <div class="theme-info">
+                                        <div class="theme-icon">
+                                            <i class="fas fa-sun"></i>
+                                        </div>
+                                        <span>Светлая</span>
+                                    </div>
+                                    <input type="radio" id="lightTheme" name="theme" class="theme-radio" value="light">
                                 </div>
                                 <div class="theme-option">
+                                    <div class="theme-info">
+                                        <div class="theme-icon">
+                                            <i class="fas fa-moon"></i>
+                                        </div>
+                                        <span>Тёмная</span>
+                                    </div>
                                     <input type="radio" id="darkTheme" name="theme" class="theme-radio" value="dark">
-                                    <label for="darkTheme">Тёмная</label>
                                 </div>
                             </div>
                             <div class="dropdown-item">
@@ -683,14 +796,15 @@
                     </div>
                 `;
             } else {
-                // Показываем кнопку входа для гостя
                 authSection.innerHTML = `
                     <button class="btn" id="refreshBtn">
-                        <i class="fas fa-sync-alt"></i> <span class="btn-text">Обновить</span>
+                        <i class="fas fa-sync-alt"></i>
+                        <span class="btn-text">Обновить</span>
                     </button>
                     ${isTelegramWebApp() ? '' : `
-                    <button class="tg-login-btn" id="tgLoginBtn">
-                        <i class="fab fa-telegram"></i> Войти через Telegram
+                    <button class="tg-btn" id="tgLoginBtn">
+                        <i class="fab fa-telegram"></i>
+                        <span class="btn-text">Войти</span>
                     </button>
                     `}
                     <div class="profile-menu">
@@ -707,12 +821,22 @@
                             </div>
                             <div class="theme-switcher">
                                 <div class="theme-option">
-                                    <input type="radio" id="lightTheme" name="theme" class="theme-radio" value="light" checked>
-                                    <label for="lightTheme">Светлая</label>
+                                    <div class="theme-info">
+                                        <div class="theme-icon">
+                                            <i class="fas fa-sun"></i>
+                                        </div>
+                                        <span>Светлая</span>
+                                    </div>
+                                    <input type="radio" id="lightTheme" name="theme" class="theme-radio" value="light">
                                 </div>
                                 <div class="theme-option">
+                                    <div class="theme-info">
+                                        <div class="theme-icon">
+                                            <i class="fas fa-moon"></i>
+                                        </div>
+                                        <span>Тёмная</span>
+                                    </div>
                                     <input type="radio" id="darkTheme" name="theme" class="theme-radio" value="dark">
-                                    <label for="darkTheme">Тёмная</label>
                                 </div>
                             </div>
                             ${isTelegramWebApp() ? '' : `
@@ -724,17 +848,14 @@
                     </div>
                 `;
             }
-
-            // Инициализируем элементы после рендера
-            initElements();
         }
 
-        // Инициализация элементов после рендера
-        function initElements() {
-            // Проверяем сохранённую тему
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Проверка сохранённой темы
             checkSavedTheme();
 
-            // Инициализация темы
+            // Обработчики темы
             const lightThemeRadio = document.getElementById('lightTheme');
             const darkThemeRadio = document.getElementById('darkTheme');
             
@@ -753,7 +874,14 @@
             // Кнопка обновления
             const refreshBtn = document.getElementById('refreshBtn');
             if (refreshBtn) {
-                refreshBtn.addEventListener('click', getUserLocation);
+                refreshBtn.addEventListener('click', () => {
+                    getUserLocation();
+                    // Анимация обновления
+                    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span class="btn-text">Обновление</span>';
+                    setTimeout(() => {
+                        refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> <span class="btn-text">Обновить</span>';
+                    }, 1000);
+                });
             }
 
             // Меню профиля
@@ -766,61 +894,38 @@
                     profileDropdown.classList.toggle('active');
                 });
 
-                // Закрытие меню при клике вне его
                 document.addEventListener('click', () => {
                     profileDropdown.classList.remove('active');
                 });
 
-                // Предотвращаем закрытие при клике внутри меню
                 profileDropdown.addEventListener('click', (e) => {
                     e.stopPropagation();
                 });
             }
 
-            // Кнопка входа через Telegram
+            // Кнопки входа/выхода
             const tgLoginBtn = document.getElementById('tgLoginBtn');
             const loginBtn = document.getElementById('loginBtn');
-            
-            if (tgLoginBtn) {
-                tgLoginBtn.addEventListener('click', loginWithTelegram);
-            }
-            
-            if (loginBtn) {
-                loginBtn.addEventListener('click', loginWithTelegram);
-            }
-
-            // Кнопка выхода
             const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', logout);
-            }
-
-            // Адаптивность - скрываем текст кнопки на мобильных
-            handleResize();
+            
+            if (tgLoginBtn) tgLoginBtn.addEventListener('click', loginWithTelegram);
+            if (loginBtn) loginBtn.addEventListener('click', loginWithTelegram);
+            if (logoutBtn) logoutBtn.addEventListener('click', logout);
         }
 
-        // Вход через Telegram (для обычного браузера)
+        // Вход через Telegram
         function loginWithTelegram() {
-            // В реальном приложении здесь будет вызов Telegram Login Widget
-            // Для демонстрации просто имитируем вход
+            // В реальном приложении используйте Telegram Login Widget
+            // Для демонстрации имитируем вход
             user.isAuthenticated = true;
             user.name = 'Тестовый Пользователь';
             user.username = 'testuser';
+            user.photoUrl = 'https://i.pravatar.cc/150?img=3';
             renderAuthSection();
+            setupEventListeners();
             
-            // В реальном приложении используйте:
-            // window.TelegramLoginWidget = {
-            //     dataOnauth: (user) => {
-            //         // Обработка данных пользователя
-            //         console.log(user);
-            //     }
-            // };
-            // И добавьте скрипт:
-            // <script async src="https://telegram.org/js/telegram-widget.js?7" 
-            //         data-telegram-login="YOUR_BOT_NAME" 
-            //         data-size="large" 
-            //         data-onauth="TelegramLoginWidget.dataOnauth(user)" 
-            //         data-request-access="write"></script>
+            // Показываем уведомление
+            showNotification(`Добро пожаловать, ${user.name}!`);
         }
 
         // Выход
@@ -830,9 +935,11 @@
             user.username = 'guest';
             user.photoUrl = null;
             renderAuthSection();
+            setupEventListeners();
+            showNotification('Вы вышли из системы');
         }
 
-        // Проверяем сохранённую тему
+        // Проверка сохранённой темы
         function checkSavedTheme() {
             const savedTheme = localStorage.getItem('weatherAppTheme');
             if (savedTheme === 'dark') {
@@ -846,36 +953,89 @@
             }
         }
 
-        // Функция для получения погоды по координатам
-        async function getWeatherByCoords(lat, lon) {
+        // Получение местоположения пользователя
+        function getUserLocation() {
+            showLoading();
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        getWeatherData(lat, lon);
+                        getLocationName(lat, lon);
+                    },
+                    error => {
+                        console.error('Ошибка геолокации:', error);
+                        // Используем координаты по умолчанию (Москва)
+                        getWeatherData(55.7558, 37.6173);
+                        locationElement.querySelector('.location-text').textContent = 'Москва, Россия';
+                        showError('Не удалось определить ваше местоположение. Показана погода в Москве.');
+                    },
+                    { timeout: 5000 }
+                );
+            } else {
+                // Браузер не поддерживает геолокацию
+                getWeatherData(55.7558, 37.6173);
+                locationElement.querySelector('.location-text').textContent = 'Москва, Россия';
+                showError('Ваш браузер не поддерживает геолокацию. Показана погода в Москве.');
+            }
+        }
+
+        // Получение данных о погоде
+        async function getWeatherData(lat, lon) {
             try {
                 // Показываем состояние загрузки
-                currentWeatherElement.innerHTML = `
-                    <div class="loading">
-                        <i class="fas fa-spinner fa-spin"></i> Загрузка данных...
-                    </div>
-                `;
-
-                // Текущая погода
-                const currentResponse = await fetch(
-                    `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${UNITS}&lang=${LANG}`
-                );
+                showLoading();
+                
+                // Делаем параллельные запросы
+                const [currentResponse, forecastResponse] = await Promise.all([
+                    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${UNITS}&lang=${LANG}`),
+                    fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${UNITS}&lang=${LANG}`)
+                ]);
+                
+                // Проверяем ответы
+                if (!currentResponse.ok || !forecastResponse.ok) {
+                    throw new Error('Ошибка при получении данных о погоде');
+                }
+                
                 const currentData = await currentResponse.json();
-
-                // Прогноз на 5 дней с почасовыми данными
-                const forecastResponse = await fetch(
-                    `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${UNITS}&lang=${LANG}`
-                );
                 const forecastData = await forecastResponse.json();
-
-                // Обработка и отображение данных
+                
+                // Отображаем данные
                 displayCurrentWeather(currentData);
                 displayWeatherDetails(currentData);
                 displayHourlyForecast(forecastData);
                 displayDailyForecast(forecastData);
+                
+                // Анимация появления
+                animateElements();
             } catch (error) {
-                console.error('Ошибка при получении данных о погоде:', error);
-                showError('Не удалось получить данные о погоде. Пожалуйста, попробуйте позже.');
+                console.error('Ошибка:', error);
+                showError('Не удалось загрузить данные о погоде. Пожалуйста, попробуйте позже.');
+            }
+        }
+
+        // Получение названия местоположения
+        async function getLocationName(lat, lon) {
+            try {
+                const response = await fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_KEY}`);
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    const location = data[0];
+                    let locationName = location.name;
+                    
+                    if (location.state && location.country) {
+                        locationName += `, ${location.state}, ${location.country}`;
+                    } else if (location.country) {
+                        locationName += `, ${location.country}`;
+                    }
+                    
+                    locationElement.querySelector('.location-text').textContent = locationName;
+                }
+            } catch (error) {
+                console.error('Ошибка при получении названия местоположения:', error);
             }
         }
 
@@ -887,8 +1047,8 @@
 
             currentWeatherElement.innerHTML = `
                 <div class="temperature">${temp}°</div>
-                <img class="weather-icon" src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="${description}">
-                <div class="weather-description">${capitalizeFirstLetter(description)}</div>
+                <img class="weather-icon" src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="${description}" class="animate-fade">
+                <div class="weather-description animate-fade">${capitalizeFirstLetter(description)}</div>
             `;
         }
 
@@ -897,41 +1057,62 @@
             const feelsLike = Math.round(data.main.feels_like);
             const humidity = data.main.humidity;
             const windSpeed = Math.round(data.wind.speed);
-            const pressure = Math.round(data.main.pressure * 0.750064); // Переводим в мм рт. ст.
+            const pressure = Math.round(data.main.pressure * 0.750064);
+            const visibility = data.visibility / 1000; // Переводим в км
 
             weatherDetailsElement.innerHTML = `
-                <div class="detail-item">
+                <div class="detail-item animate-fade" style="animation-delay: 0.1s">
                     <i class="fas fa-temperature-low detail-icon"></i>
-                    <div class="detail-value">Ощущается как ${feelsLike}°</div>
+                    <div class="detail-text">
+                        <span class="detail-label">Ощущается</span>
+                        <span class="detail-value">${feelsLike}°</span>
+                    </div>
                 </div>
-                <div class="detail-item">
+                <div class="detail-item animate-fade" style="animation-delay: 0.2s">
                     <i class="fas fa-tint detail-icon"></i>
-                    <div class="detail-value">Влажность ${humidity}%</div>
+                    <div class="detail-text">
+                        <span class="detail-label">Влажность</span>
+                        <span class="detail-value">${humidity}%</span>
+                    </div>
                 </div>
-                <div class="detail-item">
+                <div class="detail-item animate-fade" style="animation-delay: 0.3s">
                     <i class="fas fa-wind detail-icon"></i>
-                    <div class="detail-value">Ветер ${windSpeed} м/с</div>
+                    <div class="detail-text">
+                        <span class="detail-label">Ветер</span>
+                        <span class="detail-value">${windSpeed} м/с</span>
+                    </div>
                 </div>
-                <div class="detail-item">
-                    <i class="fas fa-tachometer-alt detail-icon"></i>
-                    <div class="detail-value">Давление ${pressure} мм</div>
+                <div class="detail-item animate-fade" style="animation-delay: 0.4s">
+                    <i class="fas fa-gauge-high detail-icon"></i>
+                    <div class="detail-text">
+                        <span class="detail-label">Давление</span>
+                        <span class="detail-value">${pressure} мм</span>
+                    </div>
                 </div>
             `;
         }
 
         // Отображение почасового прогноза
         function displayHourlyForecast(data) {
-            const hourlyData = data.list.slice(0, 8); // Берем первые 8 периодов (24 часа)
+            const now = new Date();
+            const currentHour = now.getHours();
             
-            hourlyForecastElement.innerHTML = hourlyData.map(item => {
+            // Фильтруем прогноз на следующие 24 часа
+            const hourlyData = data.list.filter(item => {
+                const forecastTime = new Date(item.dt * 1000);
+                const forecastHour = forecastTime.getHours();
+                return forecastHour > currentHour;
+            }).slice(0, 12); // Берем максимум 12 часов
+            
+            hourlyForecastElement.innerHTML = hourlyData.map((item, index) => {
                 const time = new Date(item.dt * 1000);
-                const hours = time.getHours().toString().padStart(2, '0');
+                const hours = time.getHours().toString().padStart(2, '0') + ':00';
                 const temp = Math.round(item.main.temp);
                 const iconCode = item.weather[0].icon;
                 
                 return `
-                    <div class="hour-card">
-                        <div class="hour-time">${hours}:00</div>
+                    <div class="hour-card animate-fade" style="animation-delay: ${0.1 * index}s">
+                        <div class="hour-time">${hours}</div>
                         <img class="hour-icon" src="https://openweathermap.org/img/wn/${iconCode}.png" alt="${item.weather[0].description}">
                         <div class="hour-temp">${temp}°</div>
                     </div>
@@ -943,9 +1124,15 @@
         function displayDailyForecast(data) {
             // Группируем по дням
             const dailyData = {};
+            const now = new Date();
+            const today = now.toLocaleDateString('ru-RU', { weekday: 'short' });
+            
             data.list.forEach(item => {
                 const date = new Date(item.dt * 1000);
                 const dayKey = date.toLocaleDateString('ru-RU', { weekday: 'short' });
+                
+                // Пропускаем сегодняшний день
+                if (dayKey === today) return;
                 
                 if (!dailyData[dayKey]) {
                     dailyData[dayKey] = {
@@ -965,14 +1152,14 @@
             });
             
             // Преобразуем в массив и отображаем
-            const days = Object.keys(dailyData);
-            dailyForecastElement.innerHTML = days.map(day => {
+            const days = Object.keys(dailyData).slice(0, 5); // Берем 5 дней
+            dailyForecastElement.innerHTML = days.map((day, index) => {
                 const dayData = dailyData[day];
                 const maxTemp = Math.round(dayData.maxTemp);
                 const minTemp = Math.round(dayData.minTemp);
                 
                 return `
-                    <div class="day-card">
+                    <div class="day-card animate-fade" style="animation-delay: ${0.1 * index}s">
                         <div class="day-name">${capitalizeFirstLetter(day)}</div>
                         <div class="day-weather">
                             <img class="day-icon" src="https://openweathermap.org/img/wn/${dayData.icon}.png" alt="${dayData.description}">
@@ -986,89 +1173,79 @@
             }).join('');
         }
 
-        // Получение местоположения пользователя
-        function getUserLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        
-                        // Получаем название местоположения
-                        getLocationName(lat, lon);
-                        
-                        // Получаем погоду
-                        getWeatherByCoords(lat, lon);
-                    },
-                    error => {
-                        console.error('Ошибка геолокации:', error);
-                        showError('Не удалось определить ваше местоположение. Пожалуйста, разрешите доступ к геолокации.');
-                        // Можно установить местоположение по умолчанию
-                        // getWeatherByCoords(55.7558, 37.6173); // Москва
-                    }
-                );
-            } else {
-                showError('Геолокация не поддерживается вашим браузером.');
-            }
+        // Показ состояния загрузки
+        function showLoading() {
+            currentWeatherElement.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>Загрузка данных о погоде...</div>
+                </div>
+            `;
+            
+            hourlyForecastElement.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                </div>
+            `;
+            
+            dailyForecastElement.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                </div>
+            `;
         }
 
-        // Получение названия местоположения по координатам
-        async function getLocationName(lat, lon) {
-            try {
-                const response = await fetch(
-                    `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${API_KEY}`
-                );
-                const data = await response.json();
-                
-                if (data && data.length > 0) {
-                    const location = data[0];
-                    let locationName = location.name;
-                    
-                    if (location.state && location.country) {
-                        locationName += `, ${location.state}, ${location.country}`;
-                    } else if (location.country) {
-                        locationName += `, ${location.country}`;
-                    }
-                    
-                    locationElement.querySelector('h2').textContent = locationName;
-                }
-            } catch (error) {
-                console.error('Ошибка при получении названия местоположения:', error);
-            }
+        // Показ ошибки
+        function showError(message) {
+            currentWeatherElement.innerHTML = `
+                <div class="error">
+                    <div class="error-icon">
+                        <i class="fas fa-triangle-exclamation"></i>
+                    </div>
+                    <div>${message}</div>
+                </div>
+            `;
+        }
+
+        // Анимация элементов
+        function animateElements() {
+            const elements = document.querySelectorAll('.animate-fade');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${0.1 * index}s`;
+            });
+        }
+
+        // Показ уведомления
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification animate-fade';
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.left = '50%';
+            notification.style.transform = 'translateX(-50%)';
+            notification.style.backgroundColor = 'var(--primary)';
+            notification.style.color = 'white';
+            notification.style.padding = '12px 24px';
+            notification.style.borderRadius = '12px';
+            notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            notification.style.zIndex = '1000';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(-50%) translateY(20px)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
         }
 
         // Вспомогательные функции
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
-
-        function showError(message) {
-            const errorElement = document.createElement('div');
-            errorElement.className = 'error';
-            errorElement.textContent = message;
-            
-            currentWeatherElement.innerHTML = '';
-            currentWeatherElement.appendChild(errorElement);
-        }
-
-        function handleResize() {
-            const btnText = document.querySelector('.btn-text');
-            if (btnText) {
-                if (window.innerWidth < 480) {
-                    btnText.style.display = 'none';
-                } else {
-                    btnText.style.display = 'inline';
-                }
-            }
-        }
-
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', () => {
-            initTelegramWebApp();
-            renderAuthSection();
-            getUserLocation();
-            window.addEventListener('resize', handleResize);
-        });
     </script>
 </body>
 </html>
