@@ -6,6 +6,7 @@
     <title>Weather App - Яндекс Погода</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --primary-color: #00a6ff;
@@ -524,44 +525,39 @@
                 gap: 10px;
             }
         }
+
+        /* Telegram кнопка */
+        .tg-login-btn {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .tg-login-btn:hover {
+            background-color: #0077b3;
+        }
+
+        .tg-login-btn i {
+            font-size: 16px;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="logo">Погода</div>
-            <div class="header-actions">
-                <button class="btn" id="refreshBtn">
-                    <i class="fas fa-sync-alt"></i> <span class="btn-text">Обновить</span>
-                </button>
-                <div class="profile-menu">
-                    <button class="btn-icon" id="profileBtn">
-                        <i class="fas fa-user-cog"></i>
-                    </button>
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <div class="dropdown-header">
-                            <div class="dropdown-avatar">U</div>
-                            <div class="dropdown-user">
-                                <div class="dropdown-user-name">Пользователь</div>
-                                <div class="dropdown-user-email">weather@telegram.org</div>
-                            </div>
-                        </div>
-                        <div class="theme-switcher">
-                            <div class="theme-option">
-                                <input type="radio" id="lightTheme" name="theme" class="theme-radio" value="light" checked>
-                                <label for="lightTheme">Светлая</label>
-                            </div>
-                            <div class="theme-option">
-                                <input type="radio" id="darkTheme" name="theme" class="theme-radio" value="dark">
-                                <label for="darkTheme">Тёмная</label>
-                            </div>
-                        </div>
-                        <div class="dropdown-item">
-                            <i class="fas fa-sign-out-alt"></i> Выйти
-                        </div>
-                    </div>
-                </div>
+            <div class="logo">Kiber-Погода</div>
+            <div class="header-actions" id="authSection">
+                <!-- Будет заполнено скриптом -->
             </div>
         </header>
 
@@ -599,64 +595,256 @@
 
     <script>
         // Конфигурация
-        const API_KEY = 'cd0d7ec8d086c6aa9f7698eafa163fdb'; // Замените на ваш API ключ
+        const API_KEY = 'cd0d7ec8d086c6aa9f7698eafa163fdbY'; // Замените на ваш API ключ
         const UNITS = 'metric'; // metric для Цельсия, imperial для Фаренгейта
         const LANG = 'ru'; // Язык ответа
 
         // DOM элементы
-        const refreshBtn = document.getElementById('refreshBtn');
-        const profileBtn = document.getElementById('profileBtn');
-        const profileDropdown = document.getElementById('profileDropdown');
+        const authSection = document.getElementById('authSection');
         const locationElement = document.getElementById('location');
         const currentWeatherElement = document.getElementById('currentWeather');
         const weatherDetailsElement = document.getElementById('weatherDetails');
         const hourlyForecastElement = document.getElementById('hourlyForecast');
         const dailyForecastElement = document.getElementById('dailyForecast');
-        const lightThemeRadio = document.getElementById('lightTheme');
-        const darkThemeRadio = document.getElementById('darkTheme');
-        const btnText = document.querySelector('.btn-text');
+
+        // Данные пользователя
+        let user = {
+            isAuthenticated: false,
+            name: 'Гость',
+            username: 'guest',
+            photoUrl: null
+        };
+
+        // Проверяем, открыто ли в Telegram WebApp
+        function isTelegramWebApp() {
+            return window.Telegram && window.Telegram.WebApp;
+        }
+
+        // Инициализация Telegram WebApp
+        function initTelegramWebApp() {
+            if (isTelegramWebApp()) {
+                const tg = window.Telegram.WebApp;
+                tg.expand(); // Раскрываем приложение на весь экран
+                
+                // Получаем данные пользователя
+                const initData = tg.initData || '';
+                const initDataUnsafe = tg.initDataUnsafe || {};
+                
+                if (initDataUnsafe.user) {
+                    user.isAuthenticated = true;
+                    user.name = initDataUnsafe.user.first_name || 'Пользователь';
+                    user.username = initDataUnsafe.user.username || 'user';
+                    user.photoUrl = initDataUnsafe.user.photo_url || null;
+                }
+                
+                renderAuthSection();
+            }
+        }
+
+        // Рендерим секцию авторизации
+        function renderAuthSection() {
+            if (user.isAuthenticated) {
+                // Показываем профиль для авторизованного пользователя
+                authSection.innerHTML = `
+                    <button class="btn" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> <span class="btn-text">Обновить</span>
+                    </button>
+                    <div class="profile-menu">
+                        <button class="btn-icon" id="profileBtn">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <div class="dropdown-avatar" style="${user.photoUrl ? `background-image: url(${user.photoUrl}); background-size: cover;` : ''}">
+                                    ${!user.photoUrl ? user.name.charAt(0).toUpperCase() : ''}
+                                </div>
+                                <div class="dropdown-user">
+                                    <div class="dropdown-user-name">${user.name}</div>
+                                    <div class="dropdown-user-email">@${user.username}</div>
+                                </div>
+                            </div>
+                            <div class="theme-switcher">
+                                <div class="theme-option">
+                                    <input type="radio" id="lightTheme" name="theme" class="theme-radio" value="light" checked>
+                                    <label for="lightTheme">Светлая</label>
+                                </div>
+                                <div class="theme-option">
+                                    <input type="radio" id="darkTheme" name="theme" class="theme-radio" value="dark">
+                                    <label for="darkTheme">Тёмная</label>
+                                </div>
+                            </div>
+                            <div class="dropdown-item">
+                                <i class="fas fa-cog"></i> Настройки
+                            </div>
+                            <div class="dropdown-item" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Показываем кнопку входа для гостя
+                authSection.innerHTML = `
+                    <button class="btn" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> <span class="btn-text">Обновить</span>
+                    </button>
+                    ${isTelegramWebApp() ? '' : `
+                    <button class="tg-login-btn" id="tgLoginBtn">
+                        <i class="fab fa-telegram"></i> Войти через Telegram
+                    </button>
+                    `}
+                    <div class="profile-menu">
+                        <button class="btn-icon" id="profileBtn">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="dropdown-header">
+                                <div class="dropdown-avatar">G</div>
+                                <div class="dropdown-user">
+                                    <div class="dropdown-user-name">Гость</div>
+                                    <div class="dropdown-user-email">guest@example.com</div>
+                                </div>
+                            </div>
+                            <div class="theme-switcher">
+                                <div class="theme-option">
+                                    <input type="radio" id="lightTheme" name="theme" class="theme-radio" value="light" checked>
+                                    <label for="lightTheme">Светлая</label>
+                                </div>
+                                <div class="theme-option">
+                                    <input type="radio" id="darkTheme" name="theme" class="theme-radio" value="dark">
+                                    <label for="darkTheme">Тёмная</label>
+                                </div>
+                            </div>
+                            ${isTelegramWebApp() ? '' : `
+                            <div class="dropdown-item" id="loginBtn">
+                                <i class="fab fa-telegram"></i> Войти через Telegram
+                            </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Инициализируем элементы после рендера
+            initElements();
+        }
+
+        // Инициализация элементов после рендера
+        function initElements() {
+            // Проверяем сохранённую тему
+            checkSavedTheme();
+
+            // Инициализация темы
+            const lightThemeRadio = document.getElementById('lightTheme');
+            const darkThemeRadio = document.getElementById('darkTheme');
+            
+            if (lightThemeRadio && darkThemeRadio) {
+                lightThemeRadio.addEventListener('change', () => {
+                    document.body.classList.remove('dark-theme');
+                    localStorage.setItem('weatherAppTheme', 'light');
+                });
+
+                darkThemeRadio.addEventListener('change', () => {
+                    document.body.classList.add('dark-theme');
+                    localStorage.setItem('weatherAppTheme', 'dark');
+                });
+            }
+
+            // Кнопка обновления
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', getUserLocation);
+            }
+
+            // Меню профиля
+            const profileBtn = document.getElementById('profileBtn');
+            const profileDropdown = document.getElementById('profileDropdown');
+            
+            if (profileBtn && profileDropdown) {
+                profileBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    profileDropdown.classList.toggle('active');
+                });
+
+                // Закрытие меню при клике вне его
+                document.addEventListener('click', () => {
+                    profileDropdown.classList.remove('active');
+                });
+
+                // Предотвращаем закрытие при клике внутри меню
+                profileDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+
+            // Кнопка входа через Telegram
+            const tgLoginBtn = document.getElementById('tgLoginBtn');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            if (tgLoginBtn) {
+                tgLoginBtn.addEventListener('click', loginWithTelegram);
+            }
+            
+            if (loginBtn) {
+                loginBtn.addEventListener('click', loginWithTelegram);
+            }
+
+            // Кнопка выхода
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logout);
+            }
+
+            // Адаптивность - скрываем текст кнопки на мобильных
+            handleResize();
+        }
+
+        // Вход через Telegram (для обычного браузера)
+        function loginWithTelegram() {
+            // В реальном приложении здесь будет вызов Telegram Login Widget
+            // Для демонстрации просто имитируем вход
+            user.isAuthenticated = true;
+            user.name = 'Тестовый Пользователь';
+            user.username = 'testuser';
+            renderAuthSection();
+            
+            // В реальном приложении используйте:
+            // window.TelegramLoginWidget = {
+            //     dataOnauth: (user) => {
+            //         // Обработка данных пользователя
+            //         console.log(user);
+            //     }
+            // };
+            // И добавьте скрипт:
+            // <script async src="https://telegram.org/js/telegram-widget.js?7" 
+            //         data-telegram-login="YOUR_BOT_NAME" 
+            //         data-size="large" 
+            //         data-onauth="TelegramLoginWidget.dataOnauth(user)" 
+            //         data-request-access="write"></script>
+        }
+
+        // Выход
+        function logout() {
+            user.isAuthenticated = false;
+            user.name = 'Гость';
+            user.username = 'guest';
+            user.photoUrl = null;
+            renderAuthSection();
+        }
 
         // Проверяем сохранённую тему
         function checkSavedTheme() {
             const savedTheme = localStorage.getItem('weatherAppTheme');
             if (savedTheme === 'dark') {
                 document.body.classList.add('dark-theme');
-                darkThemeRadio.checked = true;
+                const darkThemeRadio = document.getElementById('darkTheme');
+                if (darkThemeRadio) darkThemeRadio.checked = true;
             } else {
                 document.body.classList.remove('dark-theme');
-                lightThemeRadio.checked = true;
+                const lightThemeRadio = document.getElementById('lightTheme');
+                if (lightThemeRadio) lightThemeRadio.checked = true;
             }
         }
-
-        // Инициализация темы
-        checkSavedTheme();
-
-        // Переключение темы
-        lightThemeRadio.addEventListener('change', () => {
-            document.body.classList.remove('dark-theme');
-            localStorage.setItem('weatherAppTheme', 'light');
-        });
-
-        darkThemeRadio.addEventListener('change', () => {
-            document.body.classList.add('dark-theme');
-            localStorage.setItem('weatherAppTheme', 'dark');
-        });
-
-        // Открытие/закрытие меню профиля
-        profileBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            profileDropdown.classList.toggle('active');
-        });
-
-        // Закрытие меню при клике вне его
-        document.addEventListener('click', () => {
-            profileDropdown.classList.remove('active');
-        });
-
-        // Предотвращаем закрытие при клике внутри меню
-        profileDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
 
         // Функция для получения погоды по координатам
         async function getWeatherByCoords(lat, lon) {
@@ -863,22 +1051,24 @@
             currentWeatherElement.appendChild(errorElement);
         }
 
-        // Адаптивность - скрываем текст кнопки на мобильных
         function handleResize() {
-            if (window.innerWidth < 480) {
-                btnText.style.display = 'none';
-            } else {
-                btnText.style.display = 'inline';
+            const btnText = document.querySelector('.btn-text');
+            if (btnText) {
+                if (window.innerWidth < 480) {
+                    btnText.style.display = 'none';
+                } else {
+                    btnText.style.display = 'inline';
+                }
             }
         }
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
+            initTelegramWebApp();
+            renderAuthSection();
             getUserLocation();
-            handleResize();
             window.addEventListener('resize', handleResize);
         });
-        refreshBtn.addEventListener('click', getUserLocation);
     </script>
 </body>
 </html>
